@@ -1,0 +1,13 @@
+# LaTeX build artefacts (the repository ships the sources and the compiled PDF)
+document.aux
+document.log
+document.out
+document.toc
+document.bbl
+document.blg
+document.synctex.gz
+document.meta
+
+# Python
+__pycache__/
+*.pyc
