@@ -1,4 +1,4 @@
-# LaTeX build artefacts (the repository ships the sources and the compiled PDF)
+# LaTeX build artefacts, excluded from the repository
 document.aux
 document.log
 document.out
@@ -11,3 +11,6 @@ document.meta
 # Python
 __pycache__/
 *.pyc
+
+# the recorded output of the last verify_list.py run
+!data/w24.log

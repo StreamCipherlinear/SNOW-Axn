@@ -1,0 +1,13 @@
+input: data/w24.json
+{
+ "rank": 24,
+ "masks_with_nonzero_correlation": 6138951,
+ "bytewise_optimal": 29,
+ "log2_subset_sum6": -327.2032332591146,
+ "log2_full_sum4": -216.8436669675307,
+ "log2_full_sum6": -327.20322685452885,
+ "log2_full_sum8": -437.29090266545353,
+ "log2_full_sum10": -547.1788283144529,
+ "log2_full_sum12": -656.9330823031067,
+ "seconds": 105.4
+}
