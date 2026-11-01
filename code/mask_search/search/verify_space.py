@@ -11,6 +11,10 @@ and that the single-mask value equals (2^-54.770580)^4.
 import sys, os, io, math, json, contextlib
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import os, sys
+_CODE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.path.join(_CODE, 'mask_search', 'correlation') not in sys.path:
+    sys.path.insert(0, os.path.join(_CODE, 'mask_search', 'correlation'))
 with contextlib.redirect_stdout(io.StringIO()):
     from verify import LAT, ILAT, L, Linv, sigma, pullback
 
@@ -163,7 +167,7 @@ for k in range(1, 21):
     if bestn is None or T < bestn[0]:
         bestn = (T, k, L)
 
-with open('sei_nested.json','w') as f:
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sei_nested.json'), 'w') as f:
     json.dump(sei_list, f)
 print()
 print('(b) greedy over the first 64 masks')

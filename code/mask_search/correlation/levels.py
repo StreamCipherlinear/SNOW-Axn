@@ -1,9 +1,11 @@
-# Vectorial FCA with the SNOW substitution tau -> rho = tau^2 (the decoder sees the
-# folded parity check, not the sample):  SEI = sum rho^2 = sum tau^4,
-# N = 4*l*ln2/SEI,  cost = sqrt(N*2^(l-B)) + 2N + B*2^B.
+# How much freedom is there in "the 24 strongest"?  Exact level list near the head,
+# and the multiplicity of the level that supplies the last elements.
 import sys, io, contextlib, math
 import numpy as np
-sys.path.insert(0, r'C:\Users\Lenovo\AppData\Local\Temp\snowa_study')
+import os, sys
+_CODE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.path.join(_CODE, 'mask_search', 'correlation') not in sys.path:
+    sys.path.insert(0, os.path.join(_CODE, 'mask_search', 'correlation'))
 with contextlib.redirect_stdout(io.StringIO()):
     from verify import LAT, ILAT, L, Linv, sigma, pullback
 MU = (4, 5, 6, 12, 13, 14)
@@ -51,44 +53,31 @@ Pb_ = [pullback(b, Linv) for b in tA]
 Qb_ = [pullback(c, lambda s: Linv(sigma(L(s)))) for c in tC]
 def arr(v): return np.array([[x >> (8 * i) & 0xff for i in range(16)] for x in v], dtype=np.uint8)
 def expand(basis, k, sel): return np.bitwise_xor.reduce(sel[:, :, None] * basis[None, :, :], axis=1)
-Bm = expand(arr(tA), 16, ((np.arange(1 << 16)[:, None] >> np.arange(16)) & 1).astype(np.uint8))
-Pm = expand(arr(Pb_), 16, ((np.arange(1 << 16)[:, None] >> np.arange(16)) & 1).astype(np.uint8))
-Cm = expand(arr(tC), 8, ((np.arange(1 << 8)[:, None] >> np.arange(8)) & 1).astype(np.uint8))
-Qm = expand(arr(Qb_), 8, ((np.arange(1 << 8)[:, None] >> np.arange(8)) & 1).astype(np.uint8))
+B = expand(arr(tA), 16, ((np.arange(1 << 16)[:, None] >> np.arange(16)) & 1).astype(np.uint8))
+P = expand(arr(Pb_), 16, ((np.arange(1 << 16)[:, None] >> np.arange(16)) & 1).astype(np.uint8))
+C = expand(arr(tC), 8, ((np.arange(1 << 8)[:, None] >> np.arange(8)) & 1).astype(np.uint8))
+Q = expand(arr(Qb_), 8, ((np.arange(1 << 8)[:, None] >> np.arange(8)) & 1).astype(np.uint8))
 absL = np.abs(LAT.astype(np.int16)); absI = np.abs(ILAT.astype(np.int16))
 ILa = np.abs(ILAT.astype(np.int32))
-T12a = np.zeros((256, 256), dtype=np.uint8)
+T12a = np.zeros((256, 256), dtype=np.uint8); T12v = np.zeros((256, 256), dtype=np.int32)
 for m1 in range(256):
     pr = ILa[m1][None, :] * ILa; pr[:, 0] = 0
-    T12a[m1] = pr.argmax(axis=1).astype(np.uint8)
-N = np.ones((len(Bm), len(Cm)), dtype=np.int64)
+    T12a[m1] = pr.argmax(axis=1).astype(np.uint8); T12v[m1] = pr.max(axis=1)
+N = np.ones((len(B), len(C)), dtype=np.int64)
 for i in MU:
-    b = Bm[:, i][:, None].astype(np.int32); c = Cm[:, i][None, :].astype(np.int32)
-    p = Pm[:, i][:, None].astype(np.int32); q = Qm[:, i][None, :].astype(np.int32)
+    b = B[:, i][:, None].astype(np.int32); c = C[:, i][None, :].astype(np.int32)
+    p = P[:, i][:, None].astype(np.int32); q = Q[:, i][None, :].astype(np.int32)
     cb = (b ^ c).astype(np.int32); a = T12a[cb, c].astype(np.int32)
     N *= (absL[p, q] // 4).astype(np.int64) * (absI[cb, a] // 4).astype(np.int64) * (absI[c, a] // 4).astype(np.int64)
 N[0, 0] = 0
-tau = N[N > 0].astype(np.float64) * 2.0 ** -108
-tau.sort(); tau = tau[::-1]
-def lg(x): return math.log2(x)
-l = 512
-
-def cost(m):
-    sub = tau[:m]
-    s4 = float(np.sum(sub ** 4))          # SEI after tau -> rho = tau^2
-    best = None
-    for B in range(8, 400):
-        Nc = 4.0 * B * math.log(2.0) / s4          # checks needed (l = B)
-        D = math.sqrt(Nc * 2.0 ** (l - B))         # collision: data
-        walsh = B * 2.0 ** B
-        tot = D + 2 * Nc + walsh
-        if best is None or tot < best[0]:
-            best = (tot, B, Nc, D, walsh)
-    return s4, best
-
-print(' m            log2 sum tau^4 |  B    log2N(checks)  log2D(data)  log2Walsh  log2TOT')
-for m in [1, 4, 8, 16, 24, 64, 512, 4096, tau.size]:
-    s4, b = cost(m)
-    print(' %-12d %9.3f     | %3d   %9.3f     %9.3f   %9.3f  %9.3f' %
-          (m, lg(s4), b[1], lg(b[2]), lg(b[3]), lg(b[4]), lg(b[0])))
-print('\nfor comparison, the paper (Selcuk with rho = sum tau^2): all -> 2^243.091')
+u, cnt = np.unique(N[N > 0], return_counts=True)
+u = u[::-1]; cnt = cnt[::-1]
+cum = np.cumsum(cnt)
+print('head of the exact level list:')
+print('  #   log2|tau|     mult   cumulative')
+for k in range(20):
+    print('  %-3d %-11.5f %-6d %d' % (k, math.log2(u[k]) - 108, cnt[k], cum[k]))
+k24 = np.searchsorted(cum, 24)
+print('\nthe 24 strongest = all levels 0..%d (%d masks) + %d of the %d masks at level %d (-%.5f)'
+      % (k24 - 1, cum[k24 - 1], 24 - cum[k24 - 1], cnt[k24], k24, 108 - math.log2(u[k24])))
+print('so the set is uniquely determined:', cnt[k24] == 24 - cum[k24 - 1])

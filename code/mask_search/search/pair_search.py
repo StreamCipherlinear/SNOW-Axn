@@ -5,6 +5,10 @@ each span.  Priced by Theorem 4 with v = k, d1 = k.
 import sys, os, io, math, contextlib
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import os, sys
+_CODE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.path.join(_CODE, 'mask_search', 'correlation') not in sys.path:
+    sys.path.insert(0, os.path.join(_CODE, 'mask_search', 'correlation'))
 with contextlib.redirect_stdout(io.StringIO()):
     from verify import LAT, ILAT, L, Linv, sigma, pullback
 

@@ -8,12 +8,15 @@ Paper object: the span of W and its SEI, Table 6 and Section 5.
 import json, math, os, sys, time
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import os, sys
+_CODE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.path.join(_CODE, 'mask_search', 'correlation') not in sys.path:
+    sys.path.insert(0, os.path.join(_CODE, 'mask_search', 'correlation'))
 from verify import LAT, ILAT, L, Linv, sigma, pullback
 
 MU = (4, 5, 6, 12, 13, 14)
-HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(HERE, '..', 'data', 'w24.json')
-LOG = os.path.join(HERE, '..', 'data', 'w24.log')
+DATA = os.path.normpath(os.path.join(_CODE, '..', 'data', 'w24.json'))
+LOG = os.path.normpath(os.path.join(_CODE, '..', 'data', 'w24.log'))
 d = json.load(open(DATA, encoding='utf-8'))
 ents = d['entries']
 print('entries', len(ents))

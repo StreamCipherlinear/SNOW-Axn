@@ -13,10 +13,15 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+import os, sys
+_CODE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.path.join(_CODE, 'mask_search', 'correlation') not in sys.path:
+    sys.path.insert(0, os.path.join(_CODE, 'mask_search', 'correlation'))
 with contextlib.redirect_stdout(io.StringIO()):
     from verify import Linv, sigma, pullback
 
-entries = json.loads((HERE.parent / 'data' / 'w24.json').read_text(encoding='utf-8'))['entries'][:2]
+DATA = os.path.normpath(os.path.join(_CODE, '..', 'data', 'w24.json'))
+entries = json.loads(Path(DATA).read_text(encoding='utf-8'))['entries'][:2]
 assert len(entries) == 2
 
 

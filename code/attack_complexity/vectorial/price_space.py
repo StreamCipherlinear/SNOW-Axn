@@ -12,12 +12,13 @@ the data follow from the collision identity N^2 / 2^(l+1-Bg) = M, and
 
 Bg is scanned over 200..260 and the minimum of T is reported.
 """
-import math, json
+import math, json, os
 from statistics import NormalDist
 
+HERE = os.path.dirname(os.path.abspath(__file__))
 L = 512
 PS = 0.999992
-SEI = json.load(open('sei_nested.json'))
+SEI = json.load(open(os.path.join(HERE, 'sei_nested.json')))
 
 def z_of(p):
     # Abramowitz and Stegun 26.2.23, for p > 1/2

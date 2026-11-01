@@ -1,9 +1,10 @@
 # Sum tau^2 and the cross-term bound over the 24 strongest, reusing verify_exact.
-import math
+import math, os
 import numpy as np
 
-ns = {}
-exec(compile(open('verify_exact.py', encoding='utf-8-sig').read(),
+HERE = os.path.dirname(os.path.abspath(__file__))
+ns = {'__file__': os.path.join(HERE, 'verify_exact.py')}
+exec(compile(open(os.path.join(HERE, 'verify_exact.py'), encoding='utf-8-sig').read(),
              'verify_exact.py', 'exec'), ns)
 
 tau, Cmat = ns['tau'], ns['Cmat']

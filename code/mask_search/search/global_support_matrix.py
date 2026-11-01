@@ -173,6 +173,10 @@ print('All 276 square minors of the four P blocks are nonzero.')
 
 # Cross-check a separate, pre-existing bit-mask implementation on random masks.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import os, sys
+_CODE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.path.join(_CODE, 'mask_search', 'correlation') not in sys.path:
+    sys.path.insert(0, os.path.join(_CODE, 'mask_search', 'correlation'))
 with contextlib.redirect_stdout(io.StringIO()):
     import verify
 rng = random.Random(20261030)

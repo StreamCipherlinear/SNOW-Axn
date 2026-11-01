@@ -2,7 +2,10 @@
 # the spanning masks (hence W, hence the counts) depend on the tie-breaking.
 import sys, io, contextlib
 import numpy as np
-sys.path.insert(0, r'C:\Users\Lenovo\AppData\Local\Temp\snowa_study')
+import os, sys
+_CODE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.path.join(_CODE, 'mask_search', 'correlation') not in sys.path:
+    sys.path.insert(0, os.path.join(_CODE, 'mask_search', 'correlation'))
 with contextlib.redirect_stdout(io.StringIO()):
     from verify import LAT, ILAT, L, Linv, sigma, pullback
 MU = (4, 5, 6, 12, 13, 14)
@@ -21,7 +24,7 @@ print('multiplicity histogram:', dict(collections.Counter(T12n.ravel().tolist())
 
 # which of the 24 triples' active bytes are affected?  rebuild them quickly
 sys.argv = ['x']
-exec(open(r'C:\Users\Lenovo\AppData\Local\Temp\snowa_study\verify_W2.py').read().split('CH = 1 << 20')[0].replace("PAIR = tuple(int(x) for x in sys.argv[1].split(','))", "PAIR = (22, 24)"))
+exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'verify_W2.py')).read().split('CH = 1 << 20')[0].replace("PAIR = tuple(int(x) for x in sys.argv[1].split(','))", "PAIR = (22, 24)"))
 hit = 0
 for k in list(range(22)) + list(PAIR):
     Bb = [int(x) for x in B[bi[k]]]; Cb = [int(x) for x in C[cj[k]]]

@@ -17,10 +17,15 @@ words.
 
 ## Repository layout
 
-    code/          Python 3 and C# scripts; code/README.md maps each script to the
-                   paper object it reproduces
-    code/dev/      development history, not needed for reproduction
-    data/          w24.json (the 24 triples spanning W) and w24.log
+    code/                              Python 3 and C# scripts; code/README.md maps each script to the
+                                       paper object it reproduces
+    code/mask_search/correlation/      LAT and ILAT tables, the per-byte factorisation,
+                                       and the exact correlations of the two triples
+    code/mask_search/search/           support census, exact optimum, feasibility and
+                                       dimension checks, and the search for W
+    code/attack_complexity/            single, vectorial and distinguishing attack costs
+    code/dev/                          development history, not needed for reproduction
+    data/                              w24.json (the 24 triples spanning W) and w24.log
 
 ## Links
 
@@ -30,48 +35,52 @@ The repository is <https://github.com/StreamCipherlinear/SNOW-Axn>.
 
 * Python 3.10 or newer with numpy. The scripts were last run with Python 3.12 and
   numpy 2.3.5.
-* The .NET SDK or Mono for the two C# censuses. Each of `global_support_census.cs`
-  and `global_support_verify.cs` defines a class with a static `Run()` method and no
-  entry point, so compile it together with a one-line `Main` that calls
-  `SnowSupports.Run()` or `IndependentCensus.Run()`.
+* The .NET SDK or Mono for the two C# censuses. Each of
+  `code/mask_search/search/global_support_census.cs` and
+  `code/mask_search/search/global_support_verify.cs` defines a class with a static
+  `Run()` method and no entry point, so compile it together with a one-line `Main`
+  that calls `SnowSupports.Run()` or `IndependentCensus.Run()`.
 
-All Python scripts are run from the `code` directory, for example:
+Run each script from its own directory, for example:
 
-    cd code
+    cd code/mask_search/correlation
     python verify.py
 
 ## Reproducing the results
 
 | Paper object | Script | Expected output |
 | --- | --- | --- |
-| Table 1 (LAT and ILAT magnitude distribution), Eq. (19) and Table 3 (optimal and designers' triples) | `verify.py` | `log2 tau* = -54.7706`, designers `-55.7414`, gap `0.9709` bits |
-| Section 3.3 support census, Table 2 (the four supports) | `global_support_census.cs` | `all=472985832 screened=925588 feasible=4 same=4`, four hits with `activity=18` |
-| Section 3.3, the same census by row-space membership | `global_support_verify.cs` | identical output |
-| Section 3.3 byte matrices and MDS blocks (proof of the four supports) | `global_support_matrix.py` | both matrices agree on all 256 basis pullbacks, all 276 minors nonzero |
-| Eq. (18) and Table 2: exact optimum of the four supports | `global_optimum_scan.py` | `mu=7070 ... log2tau=-54.770580312`, three at `-55.155870468` |
-| Table 4 and Eq. (20): state-recovery cost | `audit_attack_costs.py` | `bg=241 ... time=250.919215250`, designers `252.201402061` |
-| Table 6 and Section 5: span of W, fourth and sixth power sums | `verify_list.py` | rank 24, 6,138,951 non-zero, `log2_sum4=-216.8436669675`, `log2_sum6=-327.2032268545` |
-| Section 5: separated-time kernels | `verify_mask_relations.py` | `T=(0, 2, 3) rank=383 nullity=1`, `T=(0, 1, 2, 4) rank=480 nullity=32` |
-| Section 4.2: synchronous collision kernel | `verify_synchronous_collision.py` | `kernel_dimension=0` for `Bg` 240, 241 and 243 |
+| Table 1 (LAT and ILAT magnitude distribution), Eq. (19) and Table 3 (optimal and designers' triples) | `code/mask_search/correlation/verify.py` | `log2 tau* = -54.7706`, designers `-55.7414`, gap `0.9709` bits |
+| Section 3.3 support census, Table 2 (the four supports) | `code/mask_search/search/global_support_census.cs` | `all=472985832 screened=925588 feasible=4 same=4`, four hits with `activity=18` |
+| Section 3.3, the same census by row-space membership | `code/mask_search/search/global_support_verify.cs` | identical output |
+| Section 3.3 byte matrices and MDS blocks (proof of the four supports) | `code/mask_search/search/global_support_matrix.py` | both matrices agree on all 256 basis pullbacks, all 276 minors nonzero |
+| Eq. (18) and Table 2: exact optimum of the four supports | `code/mask_search/search/global_optimum_scan.py` | `mu=7070 ... log2tau=-54.770580312`, three at `-55.155870468` |
+| Table 4 and Eq. (20): state-recovery cost | `code/attack_complexity/single/audit_attack_costs.py` | `bg=241 ... time=250.919215250`, designers `252.201402061` |
+| Table 6 and Section 5: span of W, fourth and sixth power sums | `code/attack_complexity/distinguishing/verify_list.py` | rank 24, 6,138,951 non-zero, `log2_sum4=-216.8436669675`, `log2_sum6=-327.2032268545` |
+| Section 5: separated-time kernels | `code/attack_complexity/distinguishing/verify_mask_relations.py` | `T=(0, 2, 3) rank=383 nullity=1`, `T=(0, 1, 2, 4) rank=480 nullity=32` |
+| Section 4.2: synchronous collision kernel | `code/attack_complexity/vectorial/verify_synchronous_collision.py` | `kernel_dimension=0` for `Bg` 240, 241 and 243 |
 
-The remaining top-level scripts support the argument rather than a single number.
-`verify_exact.py` and `profile.py` enumerate the correlation profile of Section 4.1,
-`levels.py` its level list, `ties.py` the multiplicity of the optimum, `fourth2.py` the
-power sums and the check-level costing, `feas.py`, `feas2.py`, `screen24.py` and
-`structure_check.py` the feasibility and dimensions of the four supports, and
+The remaining scripts support the argument rather than a single number. In
+`code/mask_search/correlation`, `verify_exact.py` and `profile.py` enumerate the
+correlation profile of Section 4.1, `levels.py` its level list, `ties.py` the
+multiplicity of the optimum, `fourth2.py` the power sums and the check-level costing,
+and `check_triple.py`, `unit_tau.py`, `t24.py`, `vectorial_snow.py` and
+`verify_W2.py` recompute or cross-check the same numbers. In
+`code/mask_search/search`, `feas.py`, `feas2.py`, `screen24.py` and
+`structure_check.py` check the feasibility and dimensions of the four supports, and
 `verify_space.py`, `pair_search.py`, `greedy_space.py`, `search_space.py`,
-`space_search2.py` and `push_k24.py` the nested-space search behind Table 6.
-`crosscheck_sei.py`, `audit_exact.py`, `audit_numbers.py`, `t24.py`,
-`vectorial_snow.py`, `price_space.py`, `price_final.py`, `check_triple.py`,
-`unit_tau.py`, `rank_check.py` and `verify_W2.py` are independent recomputations of
-numbers that the table already covers.
+`space_search2.py`, `push_k24.py`, `rank_check.py` and `crosscheck_sei.py` are the
+nested-space search behind Table 6. In `code/attack_complexity/vectorial`,
+`price_space.py`, `audit_exact.py` and `audit_numbers.py` recompute the costs, and
+`price_final.py` is the pricing run listed in the table.
 
 ## Data
 
 `data/w24.json` holds the 24 triples that span W, with byte 0 leftmost; the selection
 rule is recorded in the file. Its SHA-256 is
 `68ef228943f9f4a2fafa571e28ce43bc06a9437b68662c12b22b8fe927a256e1`, and
-`data/w24.log` is the output of the last run of `code/verify_list.py`.
+`data/w24.log` is the output of the last run of
+`code/attack_complexity/distinguishing/verify_list.py`.
 
 ## Runtime
 

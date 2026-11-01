@@ -3,7 +3,10 @@
 #   C_mu = { C : mu(C) <= mu, (C.L^-1 s^-1 L)|_{mu^c} = 0 }
 # have dimensions 16 and 8, hence |Theta_mu| = 2^24.
 import sys
-sys.path.insert(0, r'C:\Users\Lenovo\AppData\Local\Temp\snowa_study')
+import os, sys
+_CODE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.path.join(_CODE, 'mask_search', 'correlation') not in sys.path:
+    sys.path.insert(0, os.path.join(_CODE, 'mask_search', 'correlation'))
 from verify import Linv, L, sigma, pullback, to_bytes, to_word, act
 
 PATTERNS = {

@@ -2,7 +2,10 @@
 #   gamma = sigma(L(alpha)),  beta = L^{-1}(gamma),
 # then check the remaining two conditions over all 2^16 choices of alpha.
 import sys, io, contextlib
-sys.path.insert(0, r'C:\Users\Lenovo\AppData\Local\Temp\snowa_study')
+import os, sys
+_CODE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.path.join(_CODE, 'mask_search', 'correlation') not in sys.path:
+    sys.path.insert(0, os.path.join(_CODE, 'mask_search', 'correlation'))
 with contextlib.redirect_stdout(io.StringIO()):
     from verify import L, Linv, sigma, pullback, to_bytes, to_word
 

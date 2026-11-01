@@ -1,37 +1,15 @@
-"""Compute the exact profile of the optimal pattern and the costs it implies.
-
-Inputs: none; rebuilds Theta_mu from verify.py and the S-box tables.
-Outputs: sum tau^2, tau^4, tau^6 and the two cost rules for selected m.
-Paper object: the profile sums behind Section 4.2 and the cost of Table 4.
-"""
-
+# Vectorial FCA with the SNOW substitution tau -> rho = tau^2 (the decoder sees the
+# folded parity check, not the sample):  SEI = sum rho^2 = sum tau^4,
+# N = 4*l*ln2/SEI,  cost = sqrt(N*2^(l-B)) + 2N + B*2^B.
 import sys, io, contextlib, math
 import numpy as np
-sys.path.insert(0, r'C:\Users\Lenovo\AppData\Local\Temp\snowa_study')
+import os, sys
+_CODE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.path.join(_CODE, 'mask_search', 'correlation') not in sys.path:
+    sys.path.insert(0, os.path.join(_CODE, 'mask_search', 'correlation'))
 with contextlib.redirect_stdout(io.StringIO()):
     from verify import LAT, ILAT, L, Linv, sigma, pullback
 MU = (4, 5, 6, 12, 13, 14)
-from math import log, sqrt, pi, log1p
-
-def phi_inv_tail(eps):
-    """x with Phi(x) = 1 - eps."""
-    if eps > 1e-13:
-        lo, hi = -40.0, 40.0
-        for _ in range(300):
-            mid = (lo + hi) / 2
-            if 0.5 * (1.0 + math.erf(mid / math.sqrt(2.0))) < 1.0 - eps: lo = mid
-            else: hi = mid
-        return (lo + hi) / 2
-    u = -log(eps)
-    x = sqrt(2 * u - log(2 * pi * u))
-    for _ in range(60):
-        lq = -x * x / 2 - log(x) - 0.5 * log(2 * pi) + log1p(-1 / x**2 + 3 / x**4 - 15 / x**6)
-        fv = lq - log(eps)
-        df = -x + 1.0 / x
-        step = fv / df
-        x -= step
-        if abs(step) < 1e-12: break
-    return x
 
 def nullspace(rows, n):
     rows = list(rows); piv = {}; r = 0
@@ -96,34 +74,24 @@ N[0, 0] = 0
 tau = N[N > 0].astype(np.float64) * 2.0 ** -108
 tau.sort(); tau = tau[::-1]
 def lg(x): return math.log2(x)
-z1 = phi_inv_tail(1 - 0.999992)
-print('Phi^-1(0.999992) = %.4f' % z1)
-print('sum tau^2 = 2^%.3f ;  sum tau^4 = 2^%.3f ;  (sum tau^2)^2 = 2^%.3f ;  sum tau^6 = 2^%.3f'
-      % (lg(np.sum(tau**2)), lg(np.sum(tau**4)), 2*lg(np.sum(tau**2)), lg(np.sum(tau**6))))
-
 l = 512
-def attack(s2, s4, rule):
+
+def cost(m):
+    sub = tau[:m]
+    s4 = float(np.sum(sub ** 4))          # SEI after tau -> rho = tau^2
     best = None
-    for Bg in range(1, l + 1):
-        rho2 = s2 * s2 if rule == 'sq' else s4
-        M = (z1 + phi_inv_tail(2.0 ** -(Bg + 1))) ** 2 / rho2
-        Nk = math.sqrt(M * 2.0 ** (l + 1 - Bg))
-        T1 = math.sqrt(2.0) * Nk if M <= 2.0 ** (l - Bg) else Nk * (1 + lg(Nk))
-        T2 = 2.0 ** Bg * (1 + math.ceil(lg(M)))
-        T = T1 + T2
-        if best is None or T < best[0]: best = (T, Bg, Nk, M)
-    return best
+    for B in range(8, 400):
+        Nc = 4.0 * B * math.log(2.0) / s4          # checks needed (l = B)
+        D = math.sqrt(Nc * 2.0 ** (l - B))         # collision: data
+        walsh = B * 2.0 ** B
+        tot = D + 2 * Nc + walsh
+        if best is None or tot < best[0]:
+            best = (tot, B, Nc, D, walsh)
+    return s4, best
 
-print('\ncalibration against the paper (rule rho^2 = tau^4 for one mask):')
-for lbl, tv in [("designers' tau=2^-55.741", 2.0**-55.741), ("optimum tau*=2^-54.771", 2.0**-54.771)]:
-    a = attack(tv*tv, tv**4, 'quartic')
-    print('  %-28s Bg=%3d  log2N=%.3f  log2T=%.3f' % (lbl, a[1], lg(a[2]), lg(a[0])))
-
-print('\n m          | paper rule  rho=sum tau^2      | check-level  rho^2=sum tau^4')
-print('            |  Bg   log2N   log2T            |  Bg   log2N   log2T')
-for m in [1, 4, 16, 24, 64, 512, 4096, tau.size]:
-    sub = tau[:m]; s2 = float(np.sum(sub**2)); s4 = float(np.sum(sub**4))
-    a = attack(s2, s4, 'sq'); b = attack(s2, s4, 'quartic')
-    print(' %-10d | %3d  %7.3f %7.3f            | %3d  %7.3f %7.3f' %
-          (m, a[1], lg(a[2]), lg(a[0]), b[1], lg(b[2]), lg(b[0])))
-
+print(' m            log2 sum tau^4 |  B    log2N(checks)  log2D(data)  log2Walsh  log2TOT')
+for m in [1, 4, 8, 16, 24, 64, 512, 4096, tau.size]:
+    s4, b = cost(m)
+    print(' %-12d %9.3f     | %3d   %9.3f     %9.3f   %9.3f  %9.3f' %
+          (m, lg(s4), b[1], lg(b[2]), lg(b[3]), lg(b[4]), lg(b[0])))
+print('\nfor comparison, the paper (Selcuk with rho = sum tau^2): all -> 2^243.091')

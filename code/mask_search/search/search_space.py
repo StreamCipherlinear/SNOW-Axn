@@ -7,6 +7,10 @@ and its correlation must be 2^-54.7706.  Prints one row per dimension k.
 import sys, os, io, math, contextlib
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import os, sys
+_CODE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.path.join(_CODE, 'mask_search', 'correlation') not in sys.path:
+    sys.path.insert(0, os.path.join(_CODE, 'mask_search', 'correlation'))
 with contextlib.redirect_stdout(io.StringIO()):
     from verify import LAT, ILAT, L, Linv, sigma, pullback
 
