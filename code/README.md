@@ -39,7 +39,6 @@ magnitudes 32, 28 and 20 and total correlation 2^-55.7414.
 | `ties.py` | multiplicity of the bytewise maximum among the 24 strongest | 11,476 of 65,536 pairs have more than one maximiser; 72 tied active bytes among the 24 masks |
 | `fourth2.py` | profile sums and the two cost rules behind Section 4.2 | `sum tau^2 = 2^-97.938`, `sum tau^4 = 2^-213.382`, `sum tau^6 = 2^-326.187` |
 | `t24.py` | tau^2, tau^4 and the cross-term bound over the 24 strongest | `log2 sum tau^2 = -106.272`, `log2 sum tau^4 = -216.881`, relative bound `-69.003` |
-| `vectorial_snow.py` | vectorial cost of the single-mask family, for comparison with Selcuk | `all -> 2^243.091` (paper); best cost `2^248.470` |
 | `verify_W2.py` | span of one 22 + 2 selection of the 24 strongest (development aid) | `python verify_W2.py 22,24`: rank 24, 6,254,429 non-zero; superseded by `verify_list.py` |
 
 ### search
@@ -87,17 +86,16 @@ Prices Section 3.5.
 
 ### vectorial
 
-Vectorial fast correlation attack, Zhang, Liu, Meier, Sun, Feng and Wu (ASIACRYPT 2025).
-Prices Section 4.2.
+Vectorial fast correlation attack, Zhang, Liu, Meier, Sun, Feng and Wu (ASIACRYPT
+2025). Prices Section 4.2. The statistic is a vector over the space, one sample carries
+the whole vector, and the rule assigns N = 4 kappa ln2 / SEI(V_v) keystream words,
+T = N + kappa 2^kappa in time and 2^kappa words of memory, where kappa = 240 is the
+number of state bits decoded in one step.
 
 | Script | Computes | Expected output |
 | --- | --- | --- |
-| `price_final.py` | prices the attack from the cached capacities of the nested spaces | `best k=24 Bg=241 log2 N=248.9086 log2 T=250.1819` |
-| `price_space.py` | prices k = 1..20 with Bg scanned over 200..260 | `best: k=20 Bg=241 log2 N=248.9561 log2 T=250.2099` |
-| `audit_exact.py` | recomputes the cost table from the cached SEI for the designers' trail, v = 1 and v = 24 | `full log2T=250.1800`; gain `2.043` bits over the designers |
-| `audit_numbers.py` | audits every headline figure of Section 4 against the formulas | cost table and gains; `tau* check ... gap -0.9704` |
-| `verify_synchronous_collision.py` | Section 4.2 simultaneous collision kernel | `kernel_dimension=0` for `Bg` 240, 241 and 243 |
-| `sei_nested.json`, `sei_nested_24.json` | cached capacities for k = 1..20 and k = 21..24 read by the pricing scripts | the same files that `verify_space.py` and `push_k24.py` regenerate |
+| `price.py` | Table 6, Eq. (22), Eq. (23) and the Result of Section 4.2 | `v = 24: log2 N = 226.222 log2 T = 247.907 log2 mem = 240.000`, gain `3.012` bits |
+| `sei_nested.json`, `sei_nested_24.json` | cached capacities for v = 1..20 and v = 21..24, read by `price.py` | the same files that `verify_space.py` and `push_k24.py` regenerate |
 
 ### distinguishing
 
@@ -134,4 +132,5 @@ The code is released under the MIT licence; see `../LICENSE`. The paper text and
 are released under CC-BY-4.0.
 
 `dev/` holds development history, one-off probes and superseded drafts; it is not needed
-for reproduction.
+for reproduction. It also keeps `vectorial_snow.py` and `verify_synchronous_collision.py`,
+which price and check the earlier paired-clock model that the paper no longer uses.

@@ -58,21 +58,20 @@ Run each script from its own directory, for example:
 | Table 4 and Eq. (20): state-recovery cost | `code/attack_complexity/single/audit_attack_costs.py` | `bg=241 ... time=250.919215250`, designers `252.201402061` |
 | Table 6 and Section 5: span of W, fourth and sixth power sums | `code/attack_complexity/distinguishing/verify_list.py` | rank 24, 6,138,951 non-zero, `log2_sum4=-216.8436669675`, `log2_sum6=-327.2032268545` |
 | Section 5: separated-time kernels | `code/attack_complexity/distinguishing/verify_mask_relations.py` | `T=(0, 2, 3) rank=383 nullity=1`, `T=(0, 1, 2, 4) rank=480 nullity=32` |
-| Section 4.2: synchronous collision kernel | `code/attack_complexity/vectorial/verify_synchronous_collision.py` | `kernel_dimension=0` for `Bg` 240, 241 and 243 |
+| Table 6 and the Result of Section 4.2: vectorial cost | `code/attack_complexity/vectorial/price.py` | `v = 24: log2 N = 226.222 log2 T = 247.907 log2 mem = 240.000`, gain `3.012` bits |
 
 The remaining scripts support the argument rather than a single number. In
 `code/mask_search/correlation`, `verify_exact.py` and `profile.py` enumerate the
 correlation profile of Section 4.1, `levels.py` its level list, `ties.py` the
 multiplicity of the optimum, `fourth2.py` the power sums and the check-level costing,
-and `check_triple.py`, `unit_tau.py`, `t24.py`, `vectorial_snow.py` and
+and `check_triple.py`, `unit_tau.py`, `t24.py` and
 `verify_W2.py` recompute or cross-check the same numbers. In
 `code/mask_search/search`, `feas.py`, `feas2.py`, `screen24.py` and
 `structure_check.py` check the feasibility and dimensions of the four supports, and
 `verify_space.py`, `pair_search.py`, `greedy_space.py`, `search_space.py`,
 `space_search2.py`, `push_k24.py`, `rank_check.py` and `crosscheck_sei.py` are the
 nested-space search behind Table 6. In `code/attack_complexity/vectorial`,
-`price_space.py`, `audit_exact.py` and `audit_numbers.py` recompute the costs, and
-`price_final.py` is the pricing run listed in the table.
+`price.py` prices the vectorial attack of Section 4.2 and prints the dimension scan.
 
 ## Data
 

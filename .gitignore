@@ -14,3 +14,6 @@ __pycache__/
 
 # the recorded output of the last verify_list.py run
 !data/w24.log
+# capacities regenerated next to verify_space.py and push_k24.py
+code/mask_search/search/sei_nested.json
+code/mask_search/search/sei_nested_24.json

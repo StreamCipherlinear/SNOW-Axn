@@ -14,7 +14,7 @@ if os.path.join(_CODE, 'mask_search', 'correlation') not in sys.path:
 with contextlib.redirect_stdout(io.StringIO()):
     from verify import LAT, ILAT, L, Linv, sigma, pullback
 MU = (4, 5, 6, 12, 13, 14)
-PAIR = tuple(int(x) for x in sys.argv[1].split(','))
+PAIR = tuple(int(x) for x in sys.argv[1].split(',')) if len(sys.argv) > 1 else (22, 24)
 t0 = time.time()
 
 def nullspace(rows, n):

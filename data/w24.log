@@ -9,5 +9,5 @@ input: data/w24.json
  "log2_full_sum8": -437.29090266545353,
  "log2_full_sum10": -547.1788283144529,
  "log2_full_sum12": -656.9330823031067,
- "seconds": 105.4
+ "seconds": 104.7
 }
